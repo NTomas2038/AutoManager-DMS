@@ -57,7 +57,7 @@ namespace CapaDatos
         /// <param name="pObjVehiculoSC">Vehículo validado y normalizado por la Capa Lógica.</param>
         /// <returns>Identificador asignado por SQL Server.</returns>
         /// <exception cref="ClsDatoDuplicadoExcepcionDA">
-        /// La placa (UQ_Vehiculos_Placa) o el VIN (UX_Vehiculos_VIN) ya existen.
+        /// La placa (UQ_Vehiculos_Placa) o el VIN (UQ_Vehiculos_VIN) ya existen.
         /// </exception>
         public int fncInsertarVehiculoSC(ClsVehiculoENSC pObjVehiculoSC)
         {
@@ -71,8 +71,7 @@ namespace CapaDatos
             {
                 lObjComandoSC.Parameters.Add("@IdCliente", SqlDbType.Int).Value = pObjVehiculoSC.lIntIdClienteSC;
                 lObjComandoSC.Parameters.Add("@Placa", SqlDbType.VarChar, 10).Value = pObjVehiculoSC.lStrPlacaSC;
-                lObjComandoSC.Parameters.Add("@VIN", SqlDbType.VarChar, 17).Value =
-                    (object)pObjVehiculoSC.lStrVinSC ?? DBNull.Value;
+                lObjComandoSC.Parameters.Add("@VIN", SqlDbType.VarChar, 17).Value = pObjVehiculoSC.lStrVinSC;
                 lObjComandoSC.Parameters.Add("@Marca", SqlDbType.NVarChar, 50).Value = pObjVehiculoSC.lStrMarcaSC;
                 lObjComandoSC.Parameters.Add("@Modelo", SqlDbType.NVarChar, 50).Value = pObjVehiculoSC.lStrModeloSC;
                 lObjComandoSC.Parameters.Add("@Anio", SqlDbType.SmallInt).Value = pObjVehiculoSC.lIntAnioSC;
@@ -203,7 +202,7 @@ namespace CapaDatos
                 lIntIdVehiculoSC = pObjLectorSC.GetInt32(0),
                 lIntIdClienteSC = lIntIdClienteSC,
                 lStrPlacaSC = pObjLectorSC.GetString(2),
-                lStrVinSC = pObjLectorSC.IsDBNull(3) ? null : pObjLectorSC.GetString(3),
+                lStrVinSC = pObjLectorSC.GetString(3),
                 lStrMarcaSC = pObjLectorSC.GetString(4),
                 lStrModeloSC = pObjLectorSC.GetString(5),
                 lIntAnioSC = pObjLectorSC.GetInt16(6),

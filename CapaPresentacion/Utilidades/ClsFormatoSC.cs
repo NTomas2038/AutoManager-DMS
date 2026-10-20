@@ -80,16 +80,14 @@ namespace CapaPresentacion.Utilidades
         }
 
         /// <summary>
-        /// Devuelve el HTML del VIN para una tabla: con letra de ancho fijo o, si no se
-        /// registró, el texto atenuado "Sin VIN". El VIN se codifica antes de insertarse.
+        /// Devuelve el HTML del VIN para una tabla, con letra de ancho fijo.
+        /// El VIN se codifica antes de insertarse.
         /// </summary>
-        /// <param name="pStrVinSC">VIN del vehículo o nulo.</param>
+        /// <param name="pStrVinSC">VIN del vehículo.</param>
         /// <returns>Fragmento HTML seguro.</returns>
         public static string fncVinHtmlSC(string pStrVinSC)
         {
-            return string.IsNullOrEmpty(pStrVinSC)
-                ? "<span class=\"adms-dato-vacio\">Sin VIN</span>"
-                : "<span class=\"adms-vin\">" + HttpUtility.HtmlEncode(pStrVinSC) + "</span>";
+            return "<span class=\"adms-vin\">" + HttpUtility.HtmlEncode(pStrVinSC ?? string.Empty) + "</span>";
         }
 
         /// <summary>Obtiene las iniciales para el avatar: primera letra de nombres y de apellidos.</summary>

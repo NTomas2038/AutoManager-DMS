@@ -9,7 +9,7 @@
 -- La aplicacion la convierte a la hora de Guatemala solo al mostrarla.
 
 SET ANSI_NULLS ON;
-SET QUOTED_IDENTIFIER ON; -- Obligatorio para crear el indice filtrado del VIN.
+SET QUOTED_IDENTIFIER ON; -- Configuracion recomendada por SQL Server (igual que sqlcmd -I).
 GO
 
 USE AutoManagerDMS;
@@ -59,14 +59,13 @@ BEGIN
         IdVehiculo INT IDENTITY(1,1) NOT NULL,
         IdCliente INT NOT NULL,
         Placa VARCHAR(10) NOT NULL,
-        VIN VARCHAR(17) NULL,
+        VIN VARCHAR(17) NOT NULL,
         Marca NVARCHAR(50) NOT NULL,
         Modelo NVARCHAR(50) NOT NULL,
         Anio SMALLINT NOT NULL,
         FechaRegistro DATETIME2 NOT NULL
             CONSTRAINT DF_Vehiculos_FechaRegistro DEFAULT SYSUTCDATETIME(),
 
-        -- Identificador que usaran las ordenes de reparacion (FK por IdVehiculo).
         CONSTRAINT PK_Vehiculos
             PRIMARY KEY (IdVehiculo),
 
@@ -76,6 +75,11 @@ BEGIN
         CONSTRAINT UQ_Vehiculos_Placa
             UNIQUE (Placa),
 
+        -- El VIN es obligatorio y unico: identifica al vehiculo en las ordenes de
+        -- reparacion (FK OrdenesReparacion.VIN -> Vehiculos.VIN).
+        CONSTRAINT UQ_Vehiculos_VIN
+            UNIQUE (VIN),
+
         -- La placa se guarda normalizada: mayusculas y numeros, sin espacios ni guiones.
         CONSTRAINT CK_Vehiculos_Placa
             CHECK (LEN(Placa) BETWEEN 5 AND 10
@@ -83,8 +87,8 @@ BEGIN
 
         -- VIN estandar: 17 caracteres sin las letras I, O ni Q.
         CONSTRAINT CK_Vehiculos_VIN
-            CHECK (VIN IS NULL OR (LEN(VIN) = 17
-                AND VIN COLLATE Latin1_General_BIN NOT LIKE '%[^A-HJ-NPR-Z0-9]%')),
+            CHECK (LEN(VIN) = 17
+                AND VIN COLLATE Latin1_General_BIN NOT LIKE '%[^A-HJ-NPR-Z0-9]%'),
 
         CONSTRAINT CK_Vehiculos_Marca
             CHECK (LEN(Marca) > 0),
@@ -92,21 +96,48 @@ BEGIN
         CONSTRAINT CK_Vehiculos_Modelo
             CHECK (LEN(Modelo) > 0),
 
-        -- Solo el limite fijo. El maximo (anio actual + 1) se valida en
-        -- la Capa Logica, porque depende de la fecha.
+        -- Solo el limite fijo: desde 1981 los vehiculos tienen VIN de 17 caracteres.
+        -- El maximo (anio actual + 1) se valida en la Capa Logica, porque depende de la fecha.
         CONSTRAINT CK_Vehiculos_Anio
-            CHECK (Anio >= 1900)
+            CHECK (Anio >= 1981)
     );
 END
 GO
 
--- El VIN es opcional, pero si se registra no puede repetirse.
-IF NOT EXISTS (SELECT 1 FROM sys.indexes
-               WHERE name = N'UX_Vehiculos_VIN' AND object_id = OBJECT_ID(N'dbo.Vehiculos'))
+-- Actualizacion para bases creadas cuando el VIN era opcional: pasa a ser obligatorio.
+-- No inventa datos: si algun vehiculo no tiene VIN, el script se detiene para registrarlo antes.
+IF EXISTS (SELECT 1 FROM sys.columns
+           WHERE object_id = OBJECT_ID(N'dbo.Vehiculos') AND name = N'VIN' AND is_nullable = 1)
 BEGIN
-    CREATE UNIQUE INDEX UX_Vehiculos_VIN
-        ON dbo.Vehiculos (VIN)
-        WHERE VIN IS NOT NULL;
+    IF EXISTS (SELECT 1 FROM dbo.Vehiculos WHERE VIN IS NULL)
+        THROW 50001, N'Hay vehiculos sin VIN. Registra su VIN antes de ejecutar este script.', 1;
+
+    -- El indice filtrado anterior no permite llaves foraneas; lo reemplaza UQ_Vehiculos_VIN.
+    IF EXISTS (SELECT 1 FROM sys.indexes
+               WHERE name = N'UX_Vehiculos_VIN' AND object_id = OBJECT_ID(N'dbo.Vehiculos'))
+        DROP INDEX UX_Vehiculos_VIN ON dbo.Vehiculos;
+
+    ALTER TABLE dbo.Vehiculos DROP CONSTRAINT CK_Vehiculos_VIN;
+    ALTER TABLE dbo.Vehiculos ALTER COLUMN VIN VARCHAR(17) NOT NULL;
+    ALTER TABLE dbo.Vehiculos ADD CONSTRAINT CK_Vehiculos_VIN
+        CHECK (LEN(VIN) = 17
+            AND VIN COLLATE Latin1_General_BIN NOT LIKE '%[^A-HJ-NPR-Z0-9]%');
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.key_constraints
+               WHERE name = N'UQ_Vehiculos_VIN' AND parent_object_id = OBJECT_ID(N'dbo.Vehiculos'))
+BEGIN
+    ALTER TABLE dbo.Vehiculos ADD CONSTRAINT UQ_Vehiculos_VIN UNIQUE (VIN);
+END
+GO
+
+-- Actualizacion del anio minimo (antes 1900): ahora 1981, igual que la Capa Logica.
+IF EXISTS (SELECT 1 FROM sys.check_constraints
+           WHERE name = N'CK_Vehiculos_Anio' AND definition <> N'([Anio]>=(1981))')
+BEGIN
+    ALTER TABLE dbo.Vehiculos DROP CONSTRAINT CK_Vehiculos_Anio;
+    ALTER TABLE dbo.Vehiculos ADD CONSTRAINT CK_Vehiculos_Anio CHECK (Anio >= 1981);
 END
 GO
 

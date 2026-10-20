@@ -18,9 +18,10 @@ namespace CapaLogica
     public class ClsVehiculoLNSC
     {
         /// <summary>
-        /// Primer año aceptado. Coincide con la restricción CK_Vehiculos_Anio de SQL Server.
+        /// Primer año aceptado: desde 1981 los vehículos tienen VIN de 17 caracteres, que es
+        /// obligatorio. Coincide con la restricción CK_Vehiculos_Anio de SQL Server.
         /// </summary>
-        public const int lIntAnioMinimoSC = 1900;
+        public const int lIntAnioMinimoSC = 1981;
 
         /// <summary>Cantidad máxima de vehículos que devuelve una búsqueda.</summary>
         public const int lIntMaximoResultadosSC = 50;
@@ -39,7 +40,7 @@ namespace CapaLogica
 
         private const string lStrMensajePlacaDuplicadaSC = "Ya existe un vehículo registrado con esta placa.";
         private const string lStrMensajeVinDuplicadoSC = "Ya existe un vehículo registrado con este VIN.";
-        private const string lStrRestriccionVinSC = "UX_Vehiculos_VIN";
+        private const string lStrRestriccionVinSC = "UQ_Vehiculos_VIN";
 
         private static readonly Regex lRegSeparadoresSC = new Regex(@"[\s\-.]");
         private static readonly Regex lRegNoAlfanumericoSC = new Regex(@"[^A-Za-z0-9]");
@@ -82,8 +83,7 @@ namespace CapaLogica
                 lDicErroresSC[lStrCampoPlacaSC] = lStrMensajePlacaDuplicadaSC;
             }
 
-            if (pObjVehiculoSC.lStrVinSC != null && !lDicErroresSC.ContainsKey(lStrCampoVinSC)
-                && lObjVehiculoDASC.fncExisteVinSC(pObjVehiculoSC.lStrVinSC))
+            if (!lDicErroresSC.ContainsKey(lStrCampoVinSC) && lObjVehiculoDASC.fncExisteVinSC(pObjVehiculoSC.lStrVinSC))
             {
                 lDicErroresSC[lStrCampoVinSC] = lStrMensajeVinDuplicadoSC;
             }
@@ -206,9 +206,8 @@ namespace CapaLogica
             pObjVehiculoSC.lStrPlacaSC = lRegSeparadoresSC.Replace(pObjVehiculoSC.lStrPlacaSC ?? string.Empty, string.Empty)
                 .ToUpperInvariant();
 
-            string lStrVinSC = lRegSeparadoresSC.Replace(pObjVehiculoSC.lStrVinSC ?? string.Empty, string.Empty)
+            pObjVehiculoSC.lStrVinSC = lRegSeparadoresSC.Replace(pObjVehiculoSC.lStrVinSC ?? string.Empty, string.Empty)
                 .ToUpperInvariant();
-            pObjVehiculoSC.lStrVinSC = lStrVinSC.Length == 0 ? null : lStrVinSC;
 
             pObjVehiculoSC.lStrMarcaSC = fncNormalizarEspaciosSC(pObjVehiculoSC.lStrMarcaSC);
             pObjVehiculoSC.lStrModeloSC = fncNormalizarEspaciosSC(pObjVehiculoSC.lStrModeloSC);
@@ -233,10 +232,14 @@ namespace CapaLogica
                 lDicErroresSC[lStrCampoPlacaSC] = "La placa debe tener entre 5 y 10 letras o números, por ejemplo P-123ABC.";
             }
 
-            if (pObjVehiculoSC.lStrVinSC != null && !lRegVinSC.IsMatch(pObjVehiculoSC.lStrVinSC))
+            if (pObjVehiculoSC.lStrVinSC.Length == 0)
+            {
+                lDicErroresSC[lStrCampoVinSC] = "El VIN es obligatorio. Está en la tarjeta de circulación o en el parabrisas.";
+            }
+            else if (!lRegVinSC.IsMatch(pObjVehiculoSC.lStrVinSC))
             {
                 lDicErroresSC[lStrCampoVinSC] = pObjVehiculoSC.lStrVinSC.Length != 17
-                    ? "El VIN debe tener exactamente 17 caracteres. Déjalo vacío si no lo conoces."
+                    ? "El VIN debe tener exactamente 17 caracteres."
                     : "El VIN solo admite letras y números, sin I, O ni Q.";
             }
 

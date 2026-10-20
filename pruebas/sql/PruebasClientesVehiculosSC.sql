@@ -43,18 +43,18 @@ END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Vehículo válido con VIN', 0, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdAna, 'ZM902BB', N'Honda', N'CB190', 2021);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdAna, 'ZM902BB', '9ZZTEST0000000002', N'Honda', N'CB190', 2021);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
-INSERT @Resultados VALUES (N'Vehículo válido sin VIN', 0, @Obtenido);
+INSERT @Resultados VALUES (N'Segundo vehículo válido del mismo cliente', 0, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'ZP903CC', N'Toyota', N'Hilux', 2018);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'ZP903CC', '9ZZTEST0000000003', N'Toyota', N'Hilux', 1981);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
-INSERT @Resultados VALUES (N'Segundo vehículo sin VIN (otro cliente)', 0, @Obtenido);
+INSERT @Resultados VALUES (N'Vehículo de otro cliente con el primer año aceptado (1981)', 0, @Obtenido);
 
 -- ===== Clientes rechazados =====
 BEGIN TRY
@@ -115,22 +115,22 @@ INSERT @Resultados VALUES (N'Teléfono omitido (obligatorio)', 515, @Obtenido);
 
 -- ===== Vehiculos rechazados =====
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'ZP901AA', N'Kia', N'Rio', 2019);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'ZP901AA', '9ZZTEST0000000011', N'Kia', N'Rio', 2019);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Placa duplicada', 2627, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'p-555xyz', N'Kia', N'Rio', 2019);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'p-555xyz', '9ZZTEST0000000012', N'Kia', N'Rio', 2019);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Placa sin normalizar (minúsculas y guion)', 547, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'P12A', N'Kia', N'Rio', 2019);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'P12A', '9ZZTEST0000000013', N'Kia', N'Rio', 2019);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Placa de 4 caracteres', 547, @Obtenido);
@@ -140,7 +140,14 @@ BEGIN TRY
     VALUES (@IdLuis, 'ZP904DD', '9ZZTEST0000000001', N'Kia', N'Rio', 2019);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
-INSERT @Resultados VALUES (N'VIN duplicado', 2601, @Obtenido);
+INSERT @Resultados VALUES (N'VIN duplicado', 2627, @Obtenido);
+
+BEGIN TRY
+    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'ZP904DE', N'Kia', N'Rio', 2019);
+    SET @Obtenido = 0;
+END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
+INSERT @Resultados VALUES (N'Vehículo sin VIN (obligatorio)', 515, @Obtenido);
 
 BEGIN TRY
     INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
@@ -157,22 +164,22 @@ END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'VIN de 16 caracteres', 547, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (999999, 'ZP905EE', N'Kia', N'Rio', 2019);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (999999, 'ZP905EE', '9ZZTEST0000000015', N'Kia', N'Rio', 2019);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Vehículo con cliente inexistente (llave foránea)', 547, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'ZP906FF', N'Ford', N'Modelo T', 1899);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'ZP906FF', '9ZZTEST0000000016', N'Ford', N'Escort', 1980);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
-INSERT @Resultados VALUES (N'Año 1899 (límite fijo de la base)', 547, @Obtenido);
+INSERT @Resultados VALUES (N'Año 1980 (antes del VIN de 17 caracteres)', 547, @Obtenido);
 
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'ZP907GG', N'', N'Rio', 2019);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'ZP907GG', '9ZZTEST0000000017', N'', N'Rio', 2019);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Marca vacía', 547, @Obtenido);
@@ -180,8 +187,8 @@ INSERT @Resultados VALUES (N'Marca vacía', 547, @Obtenido);
 -- El máximo de año depende de la fecha y lo valida la Capa Lógica (C#),
 -- por eso la base acepta un año futuro si alguien inserta directo en SQL.
 BEGIN TRY
-    INSERT dbo.Vehiculos (IdCliente, Placa, Marca, Modelo, Anio)
-    VALUES (@IdLuis, 'ZP908HH', N'Kia', N'EV9', 2035);
+    INSERT dbo.Vehiculos (IdCliente, Placa, VIN, Marca, Modelo, Anio)
+    VALUES (@IdLuis, 'ZP908HH', '9ZZTEST0000000018', N'Kia', N'EV9', 2035);
     SET @Obtenido = 0;
 END TRY BEGIN CATCH SET @Obtenido = ERROR_NUMBER(); END CATCH;
 INSERT @Resultados VALUES (N'Año 2035: la base lo acepta (el máximo lo controla C#)', 0, @Obtenido);
@@ -189,6 +196,11 @@ INSERT @Resultados VALUES (N'Año 2035: la base lo acepta (el máximo lo control
 -- ===== Consulta de los vehículos de un cliente =====
 SET @Obtenido = (SELECT COUNT(*) FROM dbo.Vehiculos WHERE IdCliente = @IdAna);
 INSERT @Resultados VALUES (N'Ana tiene exactamente 2 vehículos asociados', 2, @Obtenido);
+
+-- ===== Relación por VIN (la usarán las órdenes de reparación) =====
+SET @Obtenido = (SELECT COUNT(*) FROM sys.key_constraints
+                 WHERE name = N'UQ_Vehiculos_VIN' AND parent_object_id = OBJECT_ID(N'dbo.Vehiculos'));
+INSERT @Resultados VALUES (N'Vehiculos.VIN tiene la restricción única UQ_Vehiculos_VIN', 1, @Obtenido);
 
 -- ===== Fechas en UTC (se revisa la definición: en un servidor UTC ambas horas coinciden) =====
 SET @Obtenido = (SELECT COUNT(*) FROM sys.default_constraints

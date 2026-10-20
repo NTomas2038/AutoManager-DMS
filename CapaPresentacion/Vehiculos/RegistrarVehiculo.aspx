@@ -99,10 +99,10 @@
                                 <asp:Label ID="errPlacaSC" runat="server" CssClass="invalid-feedback d-block" Visible="false" />
                             </div>
                             <div class="col-md-7">
-                                <label for="txtVinSC" class="form-label">VIN <span class="text-secondary fw-normal">(opcional)</span></label>
+                                <label for="txtVinSC" class="form-label">VIN <span class="adms-requerido" aria-hidden="true">*</span></label>
                                 <asp:TextBox ID="txtVinSC" runat="server" CssClass="form-control text-uppercase adms-vin" MaxLength="20"
-                                    autocomplete="off" aria-describedby="ayudaVinSC errVinSC" />
-                                <div id="ayudaVinSC" class="form-text">17 caracteres, sin las letras I, O ni Q. Déjalo vacío si no lo conoces.</div>
+                                    autocomplete="off" required="required" aria-describedby="ayudaVinSC errVinSC" />
+                                <div id="ayudaVinSC" class="form-text">17 caracteres, sin las letras I, O ni Q. Está en la tarjeta de circulación.</div>
                                 <asp:Label ID="errVinSC" runat="server" CssClass="invalid-feedback d-block" Visible="false" />
                             </div>
                         </div>

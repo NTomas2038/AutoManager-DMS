@@ -15,7 +15,6 @@ namespace CapaPresentacion.Vehiculos
         protected global::System.Web.UI.WebControls.Literal litFechaRegistroSC;
         protected global::System.Web.UI.WebControls.Literal litPlacaSC;
         protected global::System.Web.UI.WebControls.Literal litVinSC;
-        protected global::System.Web.UI.WebControls.Label lblVinVacioSC;
         protected global::System.Web.UI.WebControls.Literal litMarcaSC;
         protected global::System.Web.UI.WebControls.Literal litModeloSC;
         protected global::System.Web.UI.WebControls.Literal litAnioSC;

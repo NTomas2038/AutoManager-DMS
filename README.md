@@ -64,7 +64,7 @@ TallerMecanico.sln
 
 ### Opción A: SQL Server Express
 
-1. Crea la base de datos y sus tablas (usa siempre `-I`: activa QUOTED_IDENTIFIER, que SQL Server exige para modificar `dbo.Vehiculos` por su índice filtrado del VIN):
+1. Crea la base de datos y sus tablas (usa `-I`, igual que Docker: activa QUOTED_IDENTIFIER, la configuración que recomienda SQL Server):
    ```powershell
    sqlcmd -S .\SQLEXPRESS -E -Q "CREATE DATABASE AutoManagerDMS"
    sqlcmd -S .\SQLEXPRESS -E -I -i database\01_ClientesVehiculosSC.sql
@@ -109,7 +109,7 @@ TallerMecanico.sln
 - Crea la página principal en su carpeta de `CapaPresentacion` usando `MasterPageFile="~/Site.Master"`. El menú muestra un módulo automáticamente en cuanto su página existe:
   `Ordenes/Ordenes.aspx`, `Inventario/Inventario.aspx`, `Reportes/Reportes.aspx`.
 - Obtén las conexiones con `CapaDatos.ClsConexionDA.fncObtenerConexion()` y usa siempre parámetros (`SqlCommand.Parameters`), nunca texto concatenado.
-- Para relacionar órdenes con vehículos usa `IdVehiculo` (llave foránea a `dbo.Vehiculos`). `ClsVehiculoLNSC` ya permite obtener un vehículo, listar los de un cliente y buscar por placa o VIN.
+- Para relacionar órdenes con vehículos usa el `VIN`, que es obligatorio y único como la placa: llave foránea a `dbo.Vehiculos (VIN)` con `ON UPDATE CASCADE`. `ClsVehiculoLNSC` ya permite obtener un vehículo, listar los de un cliente y buscar por placa o VIN.
 - Agrega tus tablas en un script numerado nuevo (por ejemplo `database/02_OrdenesReparacionNT.sql`).
 - Convención de nombres del curso: clases `Cls<Entidad><EN|LN|DA><Iniciales>`, métodos `fnc…`, variables `l<Tipo>…` y parámetros `p<Tipo>…`.
 

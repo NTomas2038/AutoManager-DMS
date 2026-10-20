@@ -72,8 +72,7 @@ namespace CapaPresentacion.Vehiculos
             litFechaRegistroSC.Text = ClsFormatoSC.fncFormatearFechaSC(pObjVehiculoSC.lDatFechaRegistroUtcSC);
 
             litPlacaSC.Text = lStrPlacaSC;
-            litVinSC.Text = pObjVehiculoSC.lStrVinSC ?? string.Empty;
-            lblVinVacioSC.Visible = string.IsNullOrEmpty(pObjVehiculoSC.lStrVinSC);
+            litVinSC.Text = pObjVehiculoSC.lStrVinSC;
             litMarcaSC.Text = pObjVehiculoSC.lStrMarcaSC;
             litModeloSC.Text = pObjVehiculoSC.lStrModeloSC;
             litAnioSC.Text = pObjVehiculoSC.lIntAnioSC.ToString();

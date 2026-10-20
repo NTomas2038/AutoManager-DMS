@@ -45,10 +45,7 @@
                         </div>
                         <div>
                             <dt>VIN</dt>
-                            <dd>
-                                <span class="adms-vin"><asp:Literal ID="litVinSC" runat="server" Mode="Encode" /></span>
-                                <asp:Label ID="lblVinVacioSC" runat="server" CssClass="adms-dato-vacio" Text="No registrado" Visible="false" />
-                            </dd>
+                            <dd><span class="adms-vin"><asp:Literal ID="litVinSC" runat="server" Mode="Encode" /></span></dd>
                         </div>
                         <div>
                             <dt>Marca</dt>

@@ -19,8 +19,8 @@ namespace PruebaCapas
         {
             Console.WriteLine("== Regla del año (Capa Lógica) ==");
             var lDatReferencia = new DateTime(2026, 10, 19);
-            Verificar("1899 se rechaza", !ClsVehiculoLNSC.fncEsAnioValidoSC(1899, lDatReferencia));
-            Verificar("1900 se acepta", ClsVehiculoLNSC.fncEsAnioValidoSC(1900, lDatReferencia));
+            Verificar("1980 se rechaza (antes del VIN de 17 caracteres)", !ClsVehiculoLNSC.fncEsAnioValidoSC(1980, lDatReferencia));
+            Verificar("1981 se acepta", ClsVehiculoLNSC.fncEsAnioValidoSC(1981, lDatReferencia));
             Verificar("2027 se acepta con fecha 2026-10-19", ClsVehiculoLNSC.fncEsAnioValidoSC(2027, lDatReferencia));
             Verificar("2028 se rechaza con fecha 2026-10-19", !ClsVehiculoLNSC.fncEsAnioValidoSC(2028, lDatReferencia));
             Verificar("2028 se acepta con fecha 2027-01-01 (regla dinámica)",
@@ -95,7 +95,10 @@ namespace PruebaCapas
             VerificarValidacion($"Año {ClsVehiculoLNSC.fncObtenerAnioMaximoSC() + 1}: fuera del rango dinámico", () => lObjVehiculoLN.fncRegistrarVehiculoSC(
                 new ClsVehiculoENSC { lIntIdClienteSC = 1, lStrPlacaSC = "Z999ZZZ", lStrMarcaSC = "Kia", lStrModeloSC = "Rio" },
                 (ClsVehiculoLNSC.fncObtenerAnioMaximoSC() + 1).ToString()),
-                ClsVehiculoLNSC.lStrCampoAnioSC, "debe estar entre 1900 y " + ClsVehiculoLNSC.fncObtenerAnioMaximoSC());
+                ClsVehiculoLNSC.lStrCampoAnioSC, "debe estar entre 1981 y " + ClsVehiculoLNSC.fncObtenerAnioMaximoSC());
+            VerificarValidacion("VIN vacío: es obligatorio", () => lObjVehiculoLN.fncRegistrarVehiculoSC(
+                new ClsVehiculoENSC { lIntIdClienteSC = 1, lStrPlacaSC = "Z999ZZZ", lStrVinSC = "  ", lStrMarcaSC = "Kia", lStrModeloSC = "Rio" }, "2020"),
+                ClsVehiculoLNSC.lStrCampoVinSC, "El VIN es obligatorio");
             VerificarValidacion("VIN con la letra O se rechaza", () => lObjVehiculoLN.fncRegistrarVehiculoSC(
                 new ClsVehiculoENSC { lIntIdClienteSC = 1, lStrPlacaSC = "Z999ZZZ", lStrVinSC = "1HGCM82633A00435O", lStrMarcaSC = "Kia", lStrModeloSC = "Rio" }, "2020"),
                 ClsVehiculoLNSC.lStrCampoVinSC, "sin I, O ni Q");

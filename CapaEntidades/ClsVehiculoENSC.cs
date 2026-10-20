@@ -22,7 +22,10 @@ namespace CapaEntidades
         /// <summary>Obtiene o establece la placa normalizada (mayúsculas y números, sin guiones).</summary>
         public string lStrPlacaSC { get; set; }
 
-        /// <summary>Obtiene o establece el VIN de 17 caracteres; es opcional y puede ser nulo.</summary>
+        /// <summary>
+        /// Obtiene o establece el VIN de 17 caracteres. Es obligatorio y único: las órdenes
+        /// de reparación se relacionan con el vehículo por medio de él.
+        /// </summary>
         public string lStrVinSC { get; set; }
 
         /// <summary>Obtiene o establece la marca del vehículo.</summary>
@@ -50,6 +53,7 @@ namespace CapaEntidades
         public ClsVehiculoENSC()
         {
             lStrPlacaSC = string.Empty;
+            lStrVinSC = string.Empty;
             lStrMarcaSC = string.Empty;
             lStrModeloSC = string.Empty;
         }

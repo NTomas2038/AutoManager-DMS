@@ -23,16 +23,20 @@ Cada integrante mantiene sus propios scripts; este documento solo describe las r
 
 ## 2. Relación con vehículos
 
-Las tablas que se refieren a un vehículo usan su identificador, no el VIN (el VIN es opcional):
+Las tablas que se refieren a un vehículo usan su **VIN**. En `dbo.Vehiculos` el VIN es
+obligatorio y único (restricción `UQ_Vehiculos_VIN`), igual que la placa:
 
 ```sql
-IdVehiculo INT NOT NULL,
-CONSTRAINT FK_<Tabla>_Vehiculos FOREIGN KEY (IdVehiculo) REFERENCES dbo.Vehiculos (IdVehiculo)
+VIN VARCHAR(17) NOT NULL,
+CONSTRAINT FK_<Tabla>_Vehiculos
+    FOREIGN KEY (VIN) REFERENCES dbo.Vehiculos (VIN) ON UPDATE CASCADE
 ```
 
-La placa, el VIN y el propietario se obtienen con un `JOIN` a `dbo.Vehiculos` y `dbo.Clientes`.
-Desde C# se pueden usar `ClsVehiculoLNSC.fncObtenerVehiculoSC(idVehiculo)` y
-`ClsVehiculoLNSC.fncBuscarVehiculosSC(placaOVin)`.
+`ON UPDATE CASCADE` hace que, si se corrige un VIN mal escrito en `dbo.Vehiculos`, las filas
+relacionadas se actualicen solas. La placa y el propietario se obtienen con un `JOIN`
+(`ON v.VIN = o.VIN`) a `dbo.Vehiculos` y `dbo.Clientes`.
+Desde C# se pueden usar `ClsVehiculoLNSC.fncBuscarVehiculosSC(placaOVin)` (el VIN exacto
+aparece primero) y `ClsVehiculoLNSC.fncObtenerVehiculoSC(idVehiculo)`.
 
 ## 3. Ejemplo para `OrdenesReparacion` (propuesta para Neider)
 
@@ -44,7 +48,7 @@ IF OBJECT_ID(N'dbo.OrdenesReparacion', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.OrdenesReparacion (
         IdOrden INT IDENTITY(1,1) NOT NULL,
-        IdVehiculo INT NOT NULL,
+        VIN VARCHAR(17) NOT NULL,
         FechaApertura DATETIME2 NOT NULL
             CONSTRAINT DF_OrdenesReparacion_FechaApertura DEFAULT SYSUTCDATETIME(),
         MotivoIngreso NVARCHAR(500) NOT NULL,
@@ -56,13 +60,30 @@ BEGIN
 
         CONSTRAINT PK_OrdenesReparacion PRIMARY KEY (IdOrden),
         CONSTRAINT FK_OrdenesReparacion_Vehiculos
-            FOREIGN KEY (IdVehiculo) REFERENCES dbo.Vehiculos (IdVehiculo),
+            FOREIGN KEY (VIN) REFERENCES dbo.Vehiculos (VIN) ON UPDATE CASCADE,
         CONSTRAINT CK_OrdenesReparacion_Estado
-            CHECK (Estado IN ('Abierta', 'Cerrada'))
+            CHECK (Estado IN ('Abierta', 'Cerrada')),
+        -- Una orden abierta no tiene fecha de cierre y una cerrada sí.
+        CONSTRAINT CK_OrdenesReparacion_Cierre
+            CHECK ((Estado = 'Abierta' AND FechaCierre IS NULL)
+                OR (Estado = 'Cerrada' AND FechaCierre IS NOT NULL AND FechaCierre >= FechaApertura)),
+        CONSTRAINT CK_OrdenesReparacion_Motivo
+            CHECK (LEN(MotivoIngreso) > 0)
     );
 END
 GO
+
+-- Acelera el historial de reparaciones por VIN.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+               WHERE name = N'IX_OrdenesReparacion_VIN' AND object_id = OBJECT_ID(N'dbo.OrdenesReparacion'))
+BEGIN
+    CREATE INDEX IX_OrdenesReparacion_VIN ON dbo.OrdenesReparacion (VIN);
+END
+GO
 ```
+
+El formato del VIN no hace falta validarlo otra vez: la llave foránea solo acepta VIN que ya
+existen en `dbo.Vehiculos`, donde `CK_Vehiculos_VIN` revisa los 17 caracteres sin I, O ni Q.
 
 Si `FechaCierre` se llena desde SQL, usar también `SYSUTCDATETIME()`; si se llena desde C#,
 usar `DateTime.UtcNow`.
@@ -76,8 +97,8 @@ usar `DateTime.UtcNow`.
   (`IF OBJECT_ID(...) IS NULL`, `IF DB_ID(...) IS NULL`, `IF NOT EXISTS (...)`).
 - Todas las restricciones llevan nombre (`PK_`, `FK_`, `UQ_`, `CK_`, `DF_`, `IX_`, `UX_`)
   para que sean iguales en todas las computadoras y se puedan modificar después.
-- Incluir `SET QUOTED_IDENTIFIER ON;` al inicio. Es obligatorio cuando hay índices
-  filtrados, como el del VIN; con `sqlcmd` también hay que usar la opción `-I`.
+- Incluir `SET QUOTED_IDENTIFIER ON;` al inicio (es la configuración que recomienda SQL Server
+  y la obligatoria si algún módulo crea índices filtrados); con `sqlcmd`, usar la opción `-I`.
 
 ## 5. Identificadores
 
